@@ -10,6 +10,8 @@ from .exceptions import (
     RecordNotFoundError,
     ValidationError,
     CrudDatabaseError,
+    DuplicateRecordError,
+    ConcurrentModificationError,
 )
 
 __all__ = [
@@ -19,4 +21,5 @@ __all__ = [
     "FilterCondition", "SortField", "ListQuery", "PagedResult",
     "PerenniaCrudError", "InvalidConfigurationError", "InvalidFieldError",
     "InvalidQueryError", "RecordNotFoundError", "ValidationError", "CrudDatabaseError",
+    "DuplicateRecordError", "ConcurrentModificationError",
 ]

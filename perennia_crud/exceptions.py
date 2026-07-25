@@ -25,3 +25,18 @@ class ValidationError(PerenniaCrudError):
 
 class CrudDatabaseError(PerenniaCrudError):
     code = "crud_database_error"
+
+
+class DuplicateRecordError(PerenniaCrudError):
+    """Raised when a write violates a unique constraint (e.g. duplicate
+    key). Translated from the database driver's integrity error so callers
+    never need to catch a driver-specific exception type."""
+    code = "duplicate_record"
+
+
+class ConcurrentModificationError(PerenniaCrudError):
+    """Raised when a record changes or disappears between the moment
+    perennia-crud read it and the moment it tried to write to it (e.g.
+    another request deleted the row first). The caller should re-fetch and
+    retry, not treat this as a client input error."""
+    code = "concurrent_modification"

@@ -57,6 +57,38 @@ class CustomerHooks:
 customers = CrudEngine(config, customer_schema, hooks=CustomerHooks())
 ```
 
+## Bulk operations
+
+`bulk_create`, `bulk_update`, `bulk_delete`, and `bulk_restore` run as a
+single database transaction: all records succeed or none do. If any record
+in a batch is missing, or is changed or removed by another request while
+the batch is in flight, the entire batch is rolled back and a
+`RecordNotFoundError` or `ConcurrentModificationError` is raised — none of
+the batch is left partially applied. If you need best-effort/partial-success
+behavior instead, loop over the single-record methods yourself.
+
+## Errors
+
+All exceptions inherit from `PerenniaCrudError` and carry a stable `.code`.
+Database-driver failures are translated rather than leaking `pymysql`
+exceptions to callers: a unique-constraint violation raises
+`DuplicateRecordError`, and other database failures raise
+`CrudDatabaseError`. A `ConcurrentModificationError` means a record was
+read successfully but had already changed or disappeared by the time a
+write reached it — safe for the caller to re-fetch and retry, unlike the
+other errors above.
+
+## Connection resilience
+
+`DatabaseConfig` sets `connect_timeout` / `read_timeout` / `write_timeout`
+(all default to sane finite values, so a hung connection can't block
+forever). `CrudConfig.max_connect_retries` /
+`retry_backoff_seconds` control retrying a *new connection* after a
+transient failure (connection refused, server gone away, deadlock, lock
+wait timeout). Retries never apply to an in-flight statement, since a
+statement that already partially executed on the server should not be
+silently re-sent.
+
 ## Authorization
 
 Pass a `perennia-access` `PerenniaAccess` instance (or anything exposing
